@@ -2,7 +2,7 @@ import DepositClaim from '../models/DepositClaim.js';
 import Transaction from '../models/Transaction.js';
 import User from '../models/User.js';
 
-const DEPOSIT_ADDRESS = 'bc1qpch9s36nxu6n7v6hjrmg3s56672alhmttk5k2k';
+const DEPOSIT_ADDRESS = '132YDdJWHrRAXRAMkTTSTQca2Vxq684AtZ';
 
 export const claimDeposit = async (req, res) => {
   try {

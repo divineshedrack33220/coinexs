@@ -1,4 +1,4 @@
-const BTC_DEPOSIT_ADDRESS = 'bc1qpch9s36nxu6n7v6hjrmg3s56672alhmttk5k2k';
+const BTC_DEPOSIT_ADDRESS = '132YDdJWHrRAXRAMkTTSTQca2Vxq684AtZ';
 
 function initApp() {
   initStore();
@@ -2475,7 +2475,7 @@ function modalAddMoney() {
     closeBtn.innerHTML = createIcon('x', 20);
     title.appendChild(closeBtn);
 
-    const DEPOSIT_ADDRESS = 'bc1qpch9s36nxu6n7v6hjrmg3s56672alhmttk5k2k';
+    const DEPOSIT_ADDRESS = '132YDdJWHrRAXRAMkTTSTQca2Vxq684AtZ';
 
     const cryptoSection = el('div', { className: 'crypto-deposit' });
 
