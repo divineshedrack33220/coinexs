@@ -1225,9 +1225,10 @@ function renderCards() {
 
   const card = Store.cards?.[0];
   if (!card) {
-    return el('div', { className: 'cards-page' },
-      el('div', { style: { padding: '40px 20px', textAlign: 'center', color: '#94a3b8' } }, 'No card available yet. Please contact support.')
-    );
+    const empty = el('div', { className: 'cards-page', style: { padding: '40px 20px', textAlign: 'center', color: '#94a3b8' } });
+    empty.appendChild(el('div', { style: { marginBottom: '16px', fontSize: '15px' } }, 'No card yet. Contact Customer Care to activate your card.'));
+    empty.appendChild(el('button', { className: 'btn btn-primary', style: { height: '48px' }, onClick: () => navigate('/support') }, 'Contact Customer Care'));
+    return empty;
   }
 
   const gradients = {
@@ -2877,40 +2878,52 @@ function modalAddBank() {
   openModal((close) => {
     const body = el('div', { className: 'modal-body' });
     const header = el('div', { className: 'modal-header' });
-    header.appendChild(el('div', { className: 'modal-title' }, 'Add Bank Account'));
+    header.appendChild(el('div', { className: 'modal-title' }, 'Add Bank for Withdrawal'));
     const closeBtn = el('button', { className: 'modal-close', onClick: close });
     closeBtn.innerHTML = createIcon('x', 20);
     header.appendChild(closeBtn);
     body.appendChild(header);
 
-    const content = el('div', { style: { display: 'flex', flexDirection: 'column', gap: '16px', padding: '8px 0' } });
+    const content = el('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px', padding: '8px 0' } });
 
     const bankInput = el('input', { type: 'text', placeholder: 'Bank Name', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
     content.appendChild(bankInput);
 
-    const acctInput = el('input', { type: 'text', placeholder: 'Account Number', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
+    const acctInput = el('input', { type: 'text', placeholder: 'Account Number', inputMode: 'numeric', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
     content.appendChild(acctInput);
 
-    const routingInput = el('input', { type: 'text', placeholder: 'Routing Number', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
+    const routingInput = el('input', { type: 'text', placeholder: 'Routing Number', inputMode: 'numeric', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
     content.appendChild(routingInput);
+
+    const accountNameInput = el('input', { type: 'text', placeholder: 'Account Name', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
+    content.appendChild(accountNameInput);
+
+    const addressInput = el('input', { type: 'text', placeholder: 'Bank Address', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
+    content.appendChild(addressInput);
+
+    const amountInput = el('input', { type: 'number', placeholder: 'Amount you want to withdraw', inputMode: 'decimal', min: '0', step: '0.01', style: { width: '100%', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '16px', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', boxSizing: 'border-box' } });
+    content.appendChild(amountInput);
 
     body.appendChild(content);
 
     const footer = el('div', { className: 'modal-footer' });
-    const addBtn = el('button', { className: 'btn btn-primary w-full', style: { height: '48px' } }, 'Add Account');
+    const addBtn = el('button', { className: 'btn btn-primary w-full', style: { height: '48px' } }, 'Add & Withdraw');
     addBtn.addEventListener('click', async () => {
-      if (!bankInput.value.trim() || !acctInput.value.trim() || !routingInput.value.trim()) { haptic('error'); showToast('Please fill in all fields', 'error'); return; }
+      if (!bankInput.value.trim() || !acctInput.value.trim() || !routingInput.value.trim() || !accountNameInput.value.trim() || !addressInput.value.trim() || !amountInput.value.trim()) { haptic('error'); showToast('Please fill in all fields', 'error'); return; }
+      const amount = parseFloat(amountInput.value);
+      if (isNaN(amount) || amount <= 0) { haptic('error'); showToast('Enter a valid withdrawal amount', 'error'); return; }
       addBtn.innerHTML = '<div class="spinner spinner-sm"></div>';
       addBtn.disabled = true;
       try {
-        await Store.addBankAccount({ name: bankInput.value.trim(), type: 'Checking', accountNumber: acctInput.value.trim(), routingNumber: routingInput.value.trim() });
+        await Store.addBankAccount({ name: bankInput.value.trim(), type: 'Checking', accountName: accountNameInput.value.trim(), accountNumber: acctInput.value.trim(), routingNumber: routingInput.value.trim(), bankAddress: addressInput.value.trim() });
+        await Store.createTransaction({ type: 'pending', category: 'withdrawal', title: 'Withdrawal to Bank', amount, currency: 'USD', counterparty: bankInput.value.trim() + ' ****' + acctInput.value.trim().slice(-4) });
         haptic('success');
-        showToast('Bank account added successfully', 'success');
+        showToast('Bank added and withdrawal submitted', 'success');
         close();
         requestAnimationFrame(() => refreshPage());
       } catch (err) {
         showToast(err.message || 'Failed to add bank', 'error');
-        addBtn.innerHTML = 'Add Account';
+        addBtn.innerHTML = 'Add & Withdraw';
         addBtn.disabled = false;
       }
     });
@@ -4589,6 +4602,12 @@ function renderBankAccount() {
     card.appendChild(top);
     const accountNum = el('div', { style: { fontSize: '13px', color: 'var(--text-secondary)', fontFamily: "'Courier New', monospace" } }, '••••' + bank.last4);
     card.appendChild(accountNum);
+
+    const details = el('div', { style: { marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '12px', color: 'var(--text-muted)' } });
+    if (bank.accountName) details.appendChild(el('div', {}, 'Holder: ' + bank.accountName));
+    if (bank.routingNumber) details.appendChild(el('div', {}, 'Routing: ' + bank.routingNumber));
+    if (bank.bankAddress) details.appendChild(el('div', {}, 'Address: ' + bank.bankAddress));
+    card.appendChild(details);
 
     const actions = el('div', { style: { display: 'flex', gap: '8px', marginTop: '12px' } });
     if (!bank.isDefault) {

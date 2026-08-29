@@ -116,7 +116,7 @@ export const updateSettings = async (req, res) => {
 
 export const addBankAccount = async (req, res) => {
   try {
-    const { name, type, accountNumber, routingNumber } = req.body;
+    const { name, type, accountName, accountNumber, routingNumber, bankAddress } = req.body;
     if (!name || !accountNumber || !routingNumber) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -132,6 +132,10 @@ export const addBankAccount = async (req, res) => {
             id: bankId,
             name,
             type: type || 'Checking',
+            accountName: accountName || '',
+            accountNumber,
+            routingNumber,
+            bankAddress: bankAddress || '',
             last4,
             isDefault: req.user.bankAccounts.length === 0
           }

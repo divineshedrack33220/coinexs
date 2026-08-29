@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
     id: { type: String },
     name: { type: String },
     type: { type: String },
+    accountName: { type: String, default: '' },
+    accountNumber: { type: String, default: '' },
+    routingNumber: { type: String, default: '' },
+    bankAddress: { type: String, default: '' },
     last4: { type: String },
     isDefault: { type: Boolean, default: false }
   }],
